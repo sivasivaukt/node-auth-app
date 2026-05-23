@@ -1,0 +1,101 @@
+# CLAUDE.md — Claude Code Instructions
+**Project:** next-auth-app (Turborepo Monorepo)  
+**Owner:** Siva Panneerselvam
+
+---
+
+## Trigger Words
+
+### `start`
+Read these files in order, then summarize the current project state and ask what to work on:
+1. `docs/current_docs/project_state.md` — Latest project state
+2. `docs/claude_docs/` — What Claude did last session
+3. `docs/cursor_docs/` — What Cursor did last session
+
+### `update`
+Update the docs to reflect everything done this session:
+1. Update `docs/current_docs/project_state.md` — mark completed items, add new ones
+2. Write session summary in `docs/claude_docs/` — e.g. `session_YYYY_MM_DD.md`
+
+---
+
+## Project Overview
+
+**Type:** Turborepo + npm Workspaces monorepo  
+**Node version:** >= 20  
+**Package manager:** npm 11.5.2
+
+### Apps
+
+| App | Folder | Port | Purpose |
+|-----|--------|------|---------|
+| User App | `apps/app` | 3001 | Signup, Login, Dashboard |
+| Back Office | `apps/bo` | 3002 | Admin (placeholder, to be built) |
+
+### Backend (separate repo)
+
+| Detail | Value |
+|--------|-------|
+| Repo | `/Users/sivaeswaran/Documents/work/node-auth-app` |
+| Port | 3000 |
+| POST `/auth/signup` | body: `{ name, email, password }` |
+| POST `/auth/login` | body: `{ email, password }` → returns `{ message, token }` |
+
+---
+
+## Tech Stack
+
+- **Next.js 15.5.18** — App Router
+- **React 19**
+- **TypeScript 5**
+- **Tailwind CSS v4** — configured via `@import "tailwindcss"` in globals.css
+- **Turborepo 2.9.14**
+
+---
+
+## Folder Structure
+
+```
+next-auth-app/
+├── CLAUDE.md
+├── .cursorrules
+├── package.json          ← workspaces + packageManager field required
+├── turbo.json
+├── apps/
+│   ├── app/              ← port 3001
+│   │   ├── .env.local    ← NEXT_PUBLIC_API_URL=http://localhost:3000
+│   │   └── src/
+│   │       ├── app/
+│   │       │   ├── (auth)/login/page.tsx
+│   │       │   ├── (auth)/signup/page.tsx
+│   │       │   └── dashboard/page.tsx
+│   │       └── lib/api.ts   ← fetch calls to backend port 3000
+│   └── bo/               ← port 3002 (placeholder)
+├── packages/             ← shared code (empty, add when needed)
+└── docs/
+    ├── claude_docs/      ← Claude writes here
+    ├── cursor_docs/      ← Cursor writes here
+    └── current_docs/     ← Both read/write (latest state)
+```
+
+---
+
+## Key Rules
+
+- `packageManager` field in root `package.json` is required for Turborepo — do not remove it
+- Tailwind v4 uses `@import "tailwindcss"` — no `tailwind.config.js` needed
+- `NEXT_PUBLIC_` prefix required for env vars used in client components
+- `"use client"` required on any page using `useState`, `useEffect`, `localStorage`
+- API logic lives in `apps/app/src/lib/api.ts` — keep fetch calls there, not inline in pages
+- Shared code between `app` and `bo` goes in `packages/` — not copy-pasted
+
+---
+
+## Run Commands
+
+```bash
+npm run dev        # Start all apps
+npm run dev:app    # Start only apps/app (port 3001)
+npm run dev:bo     # Start only apps/bo (port 3002)
+npm run build      # Build all apps
+```
