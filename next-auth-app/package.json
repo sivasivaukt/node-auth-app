@@ -10,7 +10,9 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "dev:app": "turbo run dev --filter=app",
-    "dev:bo": "turbo run dev --filter=bo"
+    "dev:bo": "turbo run dev --filter=bo",
+    "build:app": "turbo run build --filter=app",
+    "build:bo": "turbo run build --filter=bo"
   },
   "devDependencies": {
     "turbo": "^2.3.3"
