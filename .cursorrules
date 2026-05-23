@@ -1,0 +1,132 @@
+# Cursor Rules — node-auth-app
+**Project:** node-auth-app (Node.js Auth API)
+**Owner:** Siva Panneerselvam
+
+---
+
+## Trigger Words
+
+### `start`
+Read these files in order, then summarize the current project state and ask what to work on:
+1. `docs/current_docs/project_state.md` — Latest project state
+2. `docs/cursor_docs/` — What Cursor did last session
+3. `docs/claude_docs/` — What Claude did last session
+
+### `update`
+Update the docs to reflect everything done this session:
+1. Update `docs/current_docs/project_state.md` — mark completed items, add new ones
+2. Write session summary in `docs/cursor_docs/` — e.g. `session_YYYY_MM_DD.md`
+
+---
+
+## Project Overview
+
+**Type:** Node.js REST API (Backend only)
+**Runtime:** Node.js >= 20
+**Language:** TypeScript (compiled to JavaScript for production)
+**Port:** 3000
+
+### API Endpoints
+
+| Method | Endpoint | Body | Response |
+|--------|----------|------|----------|
+| GET | `/` | — | Health check |
+| POST | `/auth/signup` | `{ name, email, password }` | `{ message }` |
+| POST | `/auth/login` | `{ email, password }` | `{ message, token }` |
+
+### Swagger UI
+```
+http://localhost:3000/api-docs
+```
+
+---
+
+## Tech Stack
+
+- **Express** — Web framework
+- **TypeScript** — Type-safe JavaScript
+- **MySQL2** — Database driver
+- **bcryptjs** — Password hashing
+- **jsonwebtoken** — JWT creation and verification
+- **swagger-ui-express + swagger-jsdoc** — API docs
+- **dotenv** — Environment variables
+- **cors** — Cross-origin requests (allows Next.js on port 3001/3002)
+
+---
+
+## Folder Structure
+
+```
+node-auth-app/
+├── CLAUDE.md
+├── .cursorrules
+├── src/
+│   ├── index.ts                  ← Express app entry point (port 3000)
+│   ├── config/
+│   │   └── db.ts                 ← MySQL connection
+│   ├── controllers/
+│   │   └── authController.ts     ← signup() and login() logic
+│   ├── routes/
+│   │   └── auth.ts               ← POST /auth/signup, POST /auth/login
+│   └── swagger.ts                ← Swagger config
+├── .env                          ← DB credentials + JWT secret
+├── tsconfig.json
+├── package.json
+└── docs/
+    ├── claude_docs/              ← Claude writes here
+    ├── cursor_docs/              ← Cursor writes here
+    └── current_docs/             ← Both read/write (latest state)
+```
+
+---
+
+## Environment Variables (.env)
+
+```env
+PORT=3000
+DB_HOST=localhost
+DB_USER=nodeuser
+DB_PASSWORD=NodePass@123
+DB_NAME=nodeauthdb
+JWT_SECRET=siva_secret_key_2026
+```
+
+---
+
+## Database
+
+- **MySQL** (local via Homebrew, port 3306)
+- **Database:** `nodeauthdb`
+- **User:** `nodeuser` / `NodePass@123`
+- **Table:** `users` — id, name, email, password (bcrypt), created_at
+
+---
+
+## Key Rules
+
+- Never store plain-text passwords — always use `bcrypt.hash()` before INSERT
+- JWT secret lives in `.env` — never hardcode it
+- `.env` is gitignored — never commit it
+- Use `path.resolve(process.cwd(), ".env")` to load `.env` reliably
+- `cors()` middleware must stay enabled — Next.js apps (port 3001, 3002) need it
+- All new routes go in `src/routes/` and controllers in `src/controllers/`
+- Swagger JSDoc comments belong in `src/routes/*.ts` files
+
+---
+
+## Run Commands
+
+```bash
+npm run dev    # Run with ts-node (development)
+npm run build  # Compile TypeScript → dist/
+npm start      # Run compiled dist/index.js (production)
+```
+
+---
+
+## Frontend Connection
+
+| Frontend App | Port | Repo |
+|---|---|---|
+| User App (Next.js) | 3001 | `/Users/sivaeswaran/Documents/work/next-auth-app/apps/app` |
+| Back Office (Next.js) | 3002 | `/Users/sivaeswaran/Documents/work/next-auth-app/apps/bo` |
