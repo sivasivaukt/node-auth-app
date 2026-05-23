@@ -1,0 +1,93 @@
+name: Deploy Frontend to S3
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "next-auth-app/**"
+
+jobs:
+  deploy-app:
+    name: Deploy apps/app to S3
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: |
+          cd next-auth-app
+          npm install
+
+      - name: Build apps/app
+        run: |
+          cd next-auth-app
+          npm run build:app
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload apps/app to S3
+        run: |
+          aws s3 sync next-auth-app/apps/app/out/ s3://${{ secrets.S3_BUCKET_APP }} --delete
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_ID_APP }} \
+            --paths "/*"
+          echo "✅ apps/app deployed!"
+
+  deploy-bo:
+    name: Deploy apps/bo to S3
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: |
+          cd next-auth-app
+          npm install
+
+      - name: Build apps/bo
+        run: |
+          cd next-auth-app
+          npm run build:bo
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload apps/bo to S3
+        run: |
+          aws s3 sync next-auth-app/apps/bo/out/ s3://${{ secrets.S3_BUCKET_BO }} --delete
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_ID_BO }} \
+            --paths "/*"
+          echo "✅ apps/bo deployed!"
