@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: nodeauth-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass123
+      MYSQL_DATABASE: nodeauthdb
+      MYSQL_USER: nodeuser
+      MYSQL_PASSWORD: NodePass@123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  # Node.js API
+  app:
+    build: .
+    container_name: nodeauth-app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DB_HOST: mysql
+      DB_USER: nodeuser
+      DB_PASSWORD: NodePass@123
+      DB_NAME: nodeauthdb
+      JWT_SECRET: siva_secret_key_2026
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:
