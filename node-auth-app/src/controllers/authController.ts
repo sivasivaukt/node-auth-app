@@ -74,18 +74,9 @@ export const login = (req: Request, res: Response): void => {
 };
 
 // Logout Controller
-export const logout = (req: AuthRequest, res: Response): void => {
-  const token = req.headers.authorization!.split(" ")[1];
-
-  db.query(
-    "INSERT INTO token_blacklist (token) VALUES (?)",
-    [token],
-    (err) => {
-      if (err) {
-        res.status(500).json({ message: "Server error" });
-        return;
-      }
-      res.status(200).json({ message: "Logged out successfully" });
-    }
-  );
+// JWT is stateless — no server-side invalidation needed.
+// The frontend removes the token from localStorage (api.ts), which is the
+// source of truth for auth state. verifyToken checks signature + expiry only.
+export const logout = (_req: AuthRequest, res: Response): void => {
+  res.status(200).json({ message: "Logged out successfully" });
 };

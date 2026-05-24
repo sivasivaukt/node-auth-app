@@ -1,0 +1,33 @@
+# Dependencies — reinstalled inside Docker via npm ci
+node_modules
+**/node_modules
+
+# Next.js build output — rebuilt inside Docker
+**/.next
+**/out
+
+# Turborepo cache
+.turbo
+
+# Git
+.git
+.gitignore
+.github
+
+# Local env files — MUST be excluded so they don't override .env.development
+# at build time (NEXT_PUBLIC_* vars are baked in during next build)
+**/.env.local
+**/.env.*.local
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Docs — not needed in the image
+docs
+README.md
+CLAUDE.md
+.cursorrules

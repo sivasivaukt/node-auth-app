@@ -780,3 +780,180 @@ git push → GitHub Actions → npm build → S3 upload → CloudFront invalidat
 
 *Deployment completed: 2026-05-23 — Siva Panneerselvam 💪🚀*
 *"From zero to full-stack AWS deployment in ONE DAY!"*
+
+---
+
+## FULL STACK WORKING! 🎉 (2026-05-24)
+
+### Issues Fixed & Solutions
+
+#### Issue 1 — Mixed Content (HTTPS/HTTP)
+```
+Problem  → CloudFront forces HTTPS
+           API was HTTP only
+           Browser blocked mixed content!
+
+Solution → Setup Nginx + SSL on EC2
+```
+
+#### Issue 2 — No Domain for SSL
+```
+Problem  → SSL certificate needs domain name
+           Cannot create for IP address
+
+Solution → Free subdomain from freedns.afraid.org
+           sivaapi.mooo.com → 13.204.38.60
+```
+
+#### Issue 3 — Port 80 not open
+```
+Problem  → Certbot couldn't verify domain
+           Port 80 was blocked by Security Group
+
+Solution → Added HTTP (port 80) to Security Group
+```
+
+#### Issue 4 — MySQL table missing
+```
+Problem  → New Docker MySQL container was empty
+           users table didn't exist
+           App crashed with TypeError
+
+Solution → Created users table manually:
+           docker exec -it nodeauth-mysql mysql...
+           CREATE TABLE users (...)
+```
+
+---
+
+### Nginx + SSL Setup on EC2
+
+#### Install Nginx
+```bash
+sudo apt install nginx -y
+```
+
+#### Install Certbot
+```bash
+sudo apt install certbot python3-certbot-nginx -y
+```
+
+#### Create Nginx config
+```bash
+sudo nano /etc/nginx/sites-available/sivaapi
+```
+
+```nginx
+server {
+    listen 80;
+    server_name sivaapi.mooo.com;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+#### Enable site
+```bash
+sudo ln -s /etc/nginx/sites-available/sivaapi /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+```
+
+#### Get SSL Certificate (Free!)
+```bash
+sudo certbot --nginx -d sivaapi.mooo.com
+```
+
+```
+✅ Certificate saved at → /etc/letsencrypt/live/sivaapi.mooo.com/
+✅ HTTPS enabled on → https://sivaapi.mooo.com
+✅ Auto-renewal scheduled!
+✅ Expires → 2026-08-21
+```
+
+---
+
+### Free Domain Setup (freedns.afraid.org)
+
+```
+Website  → https://freedns.afraid.org
+Username → sivasivaukt
+Domain   → sivaapi.mooo.com
+Points to → 13.204.38.60
+Type     → A record
+```
+
+---
+
+### Security Group Final Rules
+```
+Port 22   → SSH
+Port 80   → HTTP (needed for Certbot)
+Port 443  → HTTPS (Nginx SSL)
+Port 3000 → Custom TCP (Direct API access)
+```
+
+---
+
+### Final Working URLs 🚀
+```
+User App (Frontend) → https://d1yeweqrh7nmlc.cloudfront.net
+Back Office         → https://d1qfecgfqgg6i4.cloudfront.net
+API (HTTPS)         → https://sivaapi.mooo.com
+Swagger UI          → https://sivaapi.mooo.com/api-docs
+```
+
+---
+
+### Full Stack Test Results ✅
+```
+✅ Signup  → User created in MySQL Docker container
+✅ Login   → JWT token returned
+✅ Dashboard → "You are logged in!" showing
+✅ HTTPS   → SSL certificate working
+✅ CloudFront CDN → Fast delivery
+✅ S3 hosting → Static files served
+✅ Nginx   → Reverse proxy working
+✅ Docker  → All containers running
+✅ CI/CD   → Auto deploy on git push
+```
+
+---
+
+## Complete Architecture (FINAL) 🏆
+
+```
+User Browser (HTTPS)
+       ↓
+CloudFront CDN (d1yeweqrh7nmlc.cloudfront.net)
+       ↓
+S3 Bucket (siva-next-auth-app) - HTML/CSS/JS
+       ↓
+Nginx (sivaapi.mooo.com:443) - SSL Termination
+       ↓
+Node.js Docker Container (port 3000)
+       ↓
+MySQL Docker Container (port 3306)
+```
+
+### Interview Answer 🎯
+> "I built and deployed a complete full-stack application on AWS.
+> The frontend is a Next.js Turborepo monorepo deployed to S3 with
+> CloudFront CDN. The backend is a Node.js TypeScript API running
+> in Docker on EC2, fronted by Nginx with a free SSL certificate
+> from Let's Encrypt. The free domain sivaapi.mooo.com points to
+> the EC2 server. Everything is automated with GitHub Actions CI/CD
+> — pushing to main automatically deploys both frontend and backend."
+
+---
+
+*Full stack deployment completed: 2026-05-24 00:16 AM*
+*"From zero to full production deployment in ONE DAY!" 💪🚀*
+*— Siva Panneerselvam*
